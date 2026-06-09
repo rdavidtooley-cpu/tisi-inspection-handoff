@@ -47,6 +47,62 @@ Plus optional: a custom domain (`<sub>.<your-domain>`) and a chosen Pages projec
 
 ---
 
+### Step 4.5 — IMPORTANT: read this if Robert is the user
+
+Robert (the original Inspection Intel operator) has explicitly opted out of two of the credentials above:
+
+- **No Anthropic API key.** He doesn't want to use the Claude API for transcript summarization.
+- **Koyfin session is uncertain.** He may use something simpler than Koyfin for transcripts.
+
+**Don't redesign your build to summarize transcripts yourself.** Robert's existing Mac mini (`Roberts-Mac-mini.local`) already runs the full Inspection Intel morning pipeline — it downloads transcripts via Koyfin, summarizes via Claude CLI (5-section format), and **publishes the results to a public feed repo daily** at:
+
+> **https://github.com/rdavidtooley-cpu/inspection-summaries-feed**
+
+That feed is **public** (no auth needed) and updated every morning at ~5:10 AM Central. It contains:
+
+- `transcript_summaries.json` — every summary keyed by `<TICKER>_Q<n>_<YYYY>`
+- `transcripts/*.html` — rendered per-transcript HTML files
+
+#### How to consume the feed from the TISI Node.js build
+
+**Pattern A — Fetch the JSON at runtime (recommended):**
+
+```javascript
+// Once per day (e.g. at site startup or on a 6 AM CT timer)
+const url = 'https://raw.githubusercontent.com/rdavidtooley-cpu/inspection-summaries-feed/main/transcript_summaries.json';
+const res = await fetch(url);
+const summaries = await res.json();
+// summaries["MG_Q3_2026"] = { ticker, quarter, year, title, sections: [...], company, date, source_url }
+```
+
+**Pattern B — Clone + pull on a schedule:**
+
+```bash
+# On the Windows server
+cd C:\sites\
+git clone https://github.com/rdavidtooley-cpu/inspection-summaries-feed.git
+# Then daily:
+cd inspection-summaries-feed && git pull
+```
+
+Read `transcript_summaries.json` and `transcripts/*.html` from disk.
+
+#### What this means for your build
+
+- **Skip the Koyfin + Anthropic transcript pipeline entirely.** You're a consumer of the feed, not a producer.
+- **Skip credentials #8 (Koyfin session token).** Not needed.
+- **You do NOT need an Anthropic API key.**
+- **Your dashboard's "Earnings Transcripts" view** reads from the feed JSON instead of running summarization locally.
+- **Stale-data check:** if the feed's last-modified date on GitHub is older than 24h, alert Robert — his morning pipeline probably failed.
+
+#### What the feed does NOT cover
+
+Only transcript summaries — not prices, news, M&A, or any other Inspection data. For everything else, you still run your own pipeline (Yahoo Finance, SEC EDGAR, FRED — all free, no key needed).
+
+If Robert ever turns off the feed or his Mac mini goes dark, fall back to either (a) running Claude CLI on the Windows server if installed, or (b) displaying a "summaries temporarily unavailable" notice. Plan for graceful degradation, not for the feed being permanent infrastructure.
+
+---
+
 ## What's in the box
 
 ```
