@@ -63,6 +63,27 @@ That feed is **public** (no auth needed) and updated every morning at ~5:10 AM C
 - `transcript_summaries.json` — every summary keyed by `<TICKER>_Q<n>_<YYYY>`
 - `transcripts/*.html` — rendered per-transcript HTML files
 
+#### Feed schema (as of 2026-06-09)
+
+Each entry in `transcript_summaries.json` looks like this:
+
+```json
+{
+  "MG_Q3_2025": {
+    "summary": "**KEY HIGHLIGHTS**\n- Q3 2025 revenue…\n\n**SUMMARY**\n…\n\n**Q&A TAKEAWAYS**\n…\n\n**QoQ COMPARISON**\n…\n\n**KEY RISKS**\n…",
+    "ticker": "MG",
+    "quarter": 3,
+    "year": 2025,
+    "company": "Mistras Group",
+    "date": "2025-11-05"
+  }
+}
+```
+
+- `summary` is always present (markdown, five sections you parse on `**HEADING**`).
+- `ticker`, `quarter`, `year`, `company`, `date` are present on every entry from 2026-06-09 forward. Backfill is complete — older entries have these fields too.
+- `source_url` will appear once the producer migrates off Koyfin (target ~2 weeks). Treat as optional.
+
 #### How to consume the feed from the TISI Node.js build
 
 **Pattern A — Fetch the JSON at runtime (recommended):**
@@ -72,7 +93,7 @@ That feed is **public** (no auth needed) and updated every morning at ~5:10 AM C
 const url = 'https://raw.githubusercontent.com/rdavidtooley-cpu/inspection-summaries-feed/main/transcript_summaries.json';
 const res = await fetch(url);
 const summaries = await res.json();
-// summaries["MG_Q3_2026"] = { ticker, quarter, year, title, sections: [...], company, date, source_url }
+// summaries["MG_Q3_2025"] = { summary, ticker, quarter, year, company, date }
 ```
 
 **Pattern B — Clone + pull on a schedule:**
