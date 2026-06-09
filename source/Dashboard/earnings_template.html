@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inspection Intel — Earnings Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0f1117;
+            --bg-card: #1a1d29;
+            --text-primary: #e8eaed;
+            --text-secondary: #9ca3af;
+            --accent: #f59e0b;
+            --accent2: #4fc3f7;
+            --accent3: #81c784;
+            --accent4: #ba68c8;
+            --positive: #22c55e;
+            --negative: #ef4444;
+            --info-blue: #3b82f6;
+            --radius: 8px;
+            --border: 1px solid rgba(255,255,255,0.06);
+            --gap: 16px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.5;
+            font-variant-numeric: tabular-nums;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container { max-width: 1500px; margin: 0 auto; padding: 24px; }
+
+        /* Ticker Bar */
+        .ticker-bar{background:#0a0c10;border-bottom:1px solid rgba(255,255,255,0.06);height:32px;overflow:hidden;position:sticky;top:0;z-index:1001;white-space:nowrap;}
+        .ticker-track{display:inline-flex;animation:ticker-scroll 120s linear infinite;gap:0;}
+        .ticker-track:hover{animation-play-state:paused;}
+        .ticker-item{display:inline-flex;align-items:center;gap:6px;padding:0 18px;height:32px;font-size:11px;font-weight:600;color:var(--text-secondary);border-right:1px solid rgba(255,255,255,0.04);white-space:nowrap;}
+        .ticker-item .tk-sym{color:var(--accent);font-weight:700;}
+        .ticker-item .tk-price{color:var(--text-primary);}
+        .tk-up{color:var(--positive);} .tk-down{color:var(--negative);} .tk-flat{color:#9e9e9e;}
+        @keyframes ticker-scroll{0%{transform:translateX(0);}100%{transform:translateX(-50%);}}
+
+        /* Nav Bar */
+        .nav-bar {
+            display: flex;
+            gap: 4px;
+            padding: 0 24px;
+            background: #0a0c12;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            position: sticky;
+            top: 32px;
+            z-index: 1000;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .nav-bar a {
+            padding: 10px 12px;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            font-size: 12px;
+            font-weight: 500;
+            border-bottom: 2px solid transparent;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.15s;
+        }
+        .nav-bar a:hover { color: var(--text-primary); }
+        .nav-bar a.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+        .page-header { background:var(--bg-card); border:var(--border); box-shadow:inset 0 1px 0 rgba(255,255,255,0.04); padding:28px 32px; margin-bottom:var(--gap); border-radius:var(--radius); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; }
+        .page-header h1 { font-size:1.5rem; color:var(--text-primary); margin-bottom:4px; }
+        .page-header p { color:var(--text-secondary); font-size:0.9rem; }
+
+        .card {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            border: var(--border);
+            padding: 20px 24px;
+            margin-bottom: var(--gap);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* ── Calendar Section ── */
+        .cal-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+        }
+        .cal-item {
+            background: var(--bg-primary);
+            border-radius: 8px;
+            padding: 10px 14px;
+            border-left: 3px solid var(--accent);
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .cal-item .cal-date { font-size: 12px; color: var(--accent); font-weight: 700; }
+        .cal-item .cal-ticker { font-size: 14px; font-weight: 700; color: var(--text-primary); }
+        .cal-item .cal-company { font-size: 11px; color: var(--text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .cal-item .cal-est { font-size: 11px; color: var(--text-secondary); }
+        .cal-item.past { opacity: 0.5; border-left-color: var(--text-secondary); }
+        .cal-card-soon { background: rgba(245,158,11,0.08) !important; border-left: 3px solid #f59e0b !important; }
+        .cal-card-past { opacity: 0.45; }
+
+        /* ── Company Selector ── */
+        .company-select-bar {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+        .company-select-bar select {
+            padding: 10px 14px;
+            border-radius: 6px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 14px;
+            min-width: 280px;
+            outline: none;
+        }
+        .company-select-bar select:focus { border-color: var(--accent); }
+
+        /* ── Results Table ── */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        th {
+            background: rgba(79,195,247,0.08);
+            color: var(--accent);
+            text-align: left;
+            padding: 10px 12px;
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            border-bottom: 1px solid rgba(79,195,247,0.15);
+        }
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            color: var(--text-primary);
+        }
+        tr:hover td { background: rgba(79,195,247,0.03); }
+        .beat { color: var(--positive); font-weight: 600; }
+        .miss { color: var(--negative); font-weight: 600; }
+        .inline { color: var(--text-secondary); }
+
+        /* ── Transcript Summary Section ── */
+        .summary-block {
+            background: var(--bg-primary);
+            border-radius: 8px;
+            padding: 20px 24px;
+            margin-top: 16px;
+            line-height: 1.7;
+            font-size: 13px;
+        }
+        .summary-block h3 {
+            color: var(--accent);
+            font-size: 14px;
+            margin: 16px 0 8px 0;
+            font-weight: 700;
+        }
+        .summary-block h3:first-child { margin-top: 0; }
+        .summary-block ul { padding-left: 20px; margin: 4px 0; }
+        .summary-block li { margin-bottom: 4px; color: var(--text-primary); }
+        .summary-block p { color: var(--text-secondary); margin: 8px 0; }
+
+        .transcript-links {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 12px;
+        }
+        .transcript-links a {
+            padding: 6px 14px;
+            background: rgba(79,195,247,0.08);
+            color: var(--accent);
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            text-decoration: none;
+            border: 1px solid rgba(79,195,247,0.15);
+            transition: all 0.2s;
+        }
+        .transcript-links a:hover { background: rgba(79,195,247,0.15); }
+        .transcript-links a.active-q { background: rgba(79,195,247,0.2); border-color: var(--accent); }
+
+        /* ── Comparative Section ── */
+        .quarter-selector {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+        .quarter-selector button {
+            padding: 8px 16px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: var(--bg-primary);
+            color: var(--text-secondary);
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .quarter-selector button:hover { border-color: var(--accent); color: var(--accent); }
+        .quarter-selector button.active { background: rgba(79,195,247,0.1); color: var(--accent); border-color: var(--accent); font-weight: 600; }
+
+        .compare-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 14px;
+        }
+        .compare-card {
+            background: var(--bg-primary);
+            border-radius: 8px;
+            padding: 16px 20px;
+            border-left: 3px solid var(--accent);
+        }
+        .compare-card .cc-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .compare-card .cc-ticker { font-size: 16px; font-weight: 700; color: var(--accent); }
+        .compare-card .cc-company { font-size: 11px; color: var(--text-secondary); }
+        .compare-card .cc-result { font-size: 12px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+        .compare-card .cc-result.beat { background: rgba(76,175,80,0.15); }
+        .compare-card .cc-result.miss { background: rgba(244,67,54,0.15); }
+        .compare-card .cc-highlights { font-size: 12px; color: var(--text-secondary); line-height: 1.6; }
+        .compare-card .cc-highlights strong { color: var(--text-primary); }
+        .compare-card .cc-guidance {
+            margin-top: 8px;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+        .guidance-raised { background: rgba(76,175,80,0.15); color: var(--positive); }
+        .guidance-maintained { background: rgba(79,195,247,0.1); color: var(--accent); }
+        .guidance-lowered { background: rgba(244,67,54,0.15); color: var(--negative); }
+
+        .no-data { color: var(--text-secondary); font-style: italic; padding: 20px; text-align: center; }
+
+        .yf-link { color:var(--accent); text-decoration:none; font-weight:700; }
+        .yf-link:hover { text-decoration:underline; }
+        .cal-export a { text-decoration:none; cursor:pointer; opacity:0.7; }
+        .cal-export a:hover { opacity:1; }
+
+        .info-icon { position:relative; cursor:help; font-size:14px; color:#ffd700; opacity:1; display:inline-block; }
+        .info-icon:hover { color:#ffe55c; }
+
+        @media (max-width: 768px) {
+            .container { padding: 12px; }
+            .nav-bar { padding: 6px 12px; gap: 2px; }
+            .nav-bar a { padding: 6px 10px; font-size: 11px; }
+            .cal-grid { grid-template-columns: 1fr 1fr; }
+            .compare-grid { grid-template-columns: 1fr; }
+            table { font-size: 11px; }
+            th, td { padding: 6px 8px; }
+        }
+        @media (max-width: 480px) {
+            .ticker-bar { display: none !important; }
+            .page-header h1 { font-size: 1.1rem; }
+            .nav-bar a { padding: 4px 8px; font-size: 10px; }
+            .cal-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+<script src="auth.js"></script>
+<div class="ticker-bar" id="ticker-bar"><div class="ticker-track" id="ticker-track"></div></div>
+<div class="nav-bar">
+        <a href="index.html">Home</a>
+        <a href="TIC_NDT_Equities_Dashboard.html">Equities</a>
+        <a href="TIC_NDT_Peer_Analysis_Dashboard.html">Peer Analysis</a>
+        <a href="TIC_NDT_Industry_Dashboard.html">Industry</a>
+    <a href="TIC_NDT_MA_Dashboard.html">M&amp;A</a>
+        <a href="TIC_NDT_News_Dashboard.html">News</a>
+        <a href="TIC_NDT_Earnings_Dashboard.html" class="active">Earnings</a>
+        <a href="TIC_NDT_Company_Summary.html">Company</a>
+        <div style="flex:1"></div><a id="admin-nav-link" href="https://__PROJECT_DOMAIN__/admin.html" style="display:none;color:#ffd700;font-weight:700;font-size:12px;margin-right:12px;text-decoration:none;">Admin</a><a href="https://sector-intel-hub.pages.dev" style="color:#9ca3af;font-size:12px;margin-right:12px;text-decoration:none;">Dashboard</a><a href="#" onclick="iiLogout();return false" style="color:#9aa0a6;font-size:12px">Logout</a>
+    </div>
+
+<div class="container">
+
+    <!-- Page Header -->
+    <div class="page-header">
+        <div>
+            <h1>Earnings Dashboard</h1>
+            <p>Earnings calendar, results vs estimates, transcript summaries, and cross-company comparison</p>
+        </div>
+        <div style="text-align:right">
+            <div style="font-size:12px;color:var(--text-secondary)" id="last-updated"></div>
+        </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+    <!-- SECTION 1: EARNINGS CALENDAR                                       -->
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+    <div class="card">
+        <div class="section-title">Upcoming Earnings Calendar</div>
+        <div class="cal-grid" id="cal-grid"></div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+    <!-- SECTION 2: COMPANY EARNINGS DETAIL                                 -->
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+    <div class="card">
+        <div class="section-title">Company Earnings Detail</div>
+        <div class="company-select-bar">
+            <select id="company-select"><option value="">Select a company...</option></select>
+        </div>
+
+        <div id="company-detail" style="display:none;">
+            <!-- Results vs Estimates table -->
+            <div style="overflow-x:auto;">
+                <table id="results-table">
+                    <thead>
+                        <tr>
+                            <th>Quarter</th>
+                            <th>EPS Estimate</th>
+                            <th>EPS Actual</th>
+                            <th>Surprise</th>
+                            <th>Result</th>
+                        </tr>
+                    </thead>
+                    <tbody id="results-tbody"></tbody>
+                </table>
+            </div>
+
+            <!-- Transcript Summary -->
+            <div id="transcript-section" style="margin-top:20px;">
+                <div class="section-title" style="font-size:14px;">Transcript Summaries</div>
+                <div class="transcript-links" id="transcript-links"></div>
+                <div class="summary-block" id="summary-content">
+                    <p class="no-data">Select a quarter above to view the transcript summary</p>
+                </div>
+            </div>
+        </div>
+        <div id="company-placeholder" class="no-data">Select a company to view earnings results and transcript summaries</div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+    <!-- SECTION 3: QUARTERLY COMPARISON                                    -->
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+    <div class="card">
+        <div class="section-title">Quarterly Comparison</div>
+        <p style="font-size:13px;color:var(--text-secondary);margin-bottom:16px;">Select a quarter to compare how all companies performed — results, key themes, and guidance direction.</p>
+        <div class="quarter-selector" id="quarter-selector"></div>
+        <div class="compare-grid" id="compare-grid"></div>
+        <div id="compare-placeholder" class="no-data">Select a quarter above to see the cross-company comparison</div>
+    </div>
+
+</div>
+
+<script>
+// INJECTED_DATA_START
+var EARNINGS_DATA = {};
+// INJECTED_DATA_END
+</script>
+
+<script>
+(function() {
+    'use strict';
+
+    const D = EARNINGS_DATA;
+    const md = D.market_data || {};
+    const calendar = D.calendar || [];
+    const transcripts = D.transcript_summaries || {};
+    const analysis = D.analysis_bundle || {};
+    const catColors = D.category_colors || {};
+
+    // ── Ticker bar ──
+    function buildTickerBar() {
+        const track = document.getElementById('ticker-track');
+        if (!track) return;
+        const tickers = Object.entries(md).filter(([k,v]) => typeof v === 'object' && v.price_usd);
+        if (!tickers.length) return;
+        let html = '';
+        tickers.forEach(([t, d]) => {
+            const chg = d.daily_change_pct || 0;
+            const cls = chg > 0 ? 'tk-up' : chg < 0 ? 'tk-down' : 'tk-flat';
+            const sign = chg > 0 ? '+' : '';
+            html += `<div class="ticker-item"><span class="tk-sym">${d.display_ticker||t}</span><span class="tk-price">$${(d.price_usd||0).toFixed(2)}</span><span class="${cls}">${sign}${chg.toFixed(2)}%</span></div>`;
+        });
+        track.innerHTML = html + html;
+    }
+
+    // ── Calendar ──
+    function calProximityClass(dateStr) {
+        if (!dateStr) return '';
+        var d = new Date(dateStr);
+        var now = new Date();
+        var diffDays = (d - now) / (1000 * 60 * 60 * 24);
+        if (diffDays < -1) return 'cal-card-past';
+        if (diffDays <= 7) return 'cal-card-soon';
+        return '';
+    }
+
+    function googleCalUrl(ticker, dateStr) {
+        var d = new Date(dateStr);
+        var ymd = d.getFullYear() + ('0'+(d.getMonth()+1)).slice(-2) + ('0'+d.getDate()).slice(-2);
+        return 'https://calendar.google.com/calendar/render?action=TEMPLATE'
+            + '&text=' + encodeURIComponent(ticker + ' Earnings')
+            + '&dates=' + ymd + '/' + ymd
+            + '&details=' + encodeURIComponent(ticker + ' earnings report');
+    }
+    window.downloadIcs = downloadIcs;
+    function downloadIcs(ticker, dateStr) {
+        var d = new Date(dateStr);
+        var ymd = d.getFullYear() + ('0'+(d.getMonth()+1)).slice(-2) + ('0'+d.getDate()).slice(-2);
+        var ics = 'BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\nDTSTART;VALUE=DATE:' + ymd
+            + '\nDTEND;VALUE=DATE:' + ymd + '\nSUMMARY:' + ticker + ' Earnings'
+            + '\nDESCRIPTION:' + ticker + ' earnings report\nEND:VEVENT\nEND:VCALENDAR';
+        var blob = new Blob([ics], {type:'text/calendar'});
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = ticker + '_earnings.ics';
+        a.click();
+    }
+
+    function buildCalendar() {
+        const grid = document.getElementById('cal-grid');
+        if (!calendar.length) { grid.innerHTML = '<div class="no-data">No upcoming earnings dates available</div>'; return; }
+        const today = new Date().toISOString().slice(0,10);
+        let html = '';
+        calendar.forEach(c => {
+            const isPast = c.report_date < today;
+            const dt = new Date(c.report_date + 'T12:00:00');
+            const dateStr = dt.toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
+            const color = catColors[c.category] || '#ffd700';
+            const proxClass = calProximityClass(c.report_date);
+            html += `<div class="cal-item${isPast?' past':''}${proxClass?' '+proxClass:''}" style="border-left-color:${color}">
+                <span class="cal-date">${dateStr}</span>
+                <span class="cal-ticker"><a class="yf-link" href="TIC_NDT_Company_Summary.html#company=${c.ticker}">${c.ticker}</a></span>
+                <span class="cal-company">${c.company}</span>
+                ${c.est_eps != null ? `<span class="cal-est">Est. EPS: $${Number(c.est_eps).toFixed(2)}</span>` : ''}
+                <div class="cal-export"><a href="${googleCalUrl(c.ticker, c.report_date)}" target="_blank" title="Add to Google Calendar">📅</a> <a href="#" onclick="downloadIcs('${c.ticker}','${c.report_date}');return false;" title="Download .ics">📥</a></div>
+            </div>`;
+        });
+        grid.innerHTML = html;
+    }
+
+    // ── Company Selector ──
+    function buildCompanySelect() {
+        const sel = document.getElementById('company-select');
+        const tickers = Object.entries(md)
+            .filter(([k,v]) => typeof v === 'object' && v.name)
+            .sort((a,b) => (a[1].name||'').localeCompare(b[1].name||''));
+
+        tickers.forEach(([t, d]) => {
+            const opt = document.createElement('option');
+            opt.value = t;
+            opt.textContent = `${d.name} (${d.display_ticker||t})`;
+            sel.appendChild(opt);
+        });
+
+        sel.addEventListener('change', function() {
+            if (this.value) {
+                showCompanyDetail(this.value);
+            } else {
+                document.getElementById('company-detail').style.display = 'none';
+                document.getElementById('company-placeholder').style.display = '';
+            }
+        });
+    }
+
+    function showCompanyDetail(ticker) {
+        document.getElementById('company-placeholder').style.display = 'none';
+        document.getElementById('company-detail').style.display = '';
+
+        const d = md[ticker] || {};
+        const hist = d.earnings_history || [];
+
+        // Results table
+        const tbody = document.getElementById('results-tbody');
+        if (!hist.length) {
+            tbody.innerHTML = '<tr><td colspan="5" class="no-data">No earnings history available</td></tr>';
+        } else {
+            let rows = '';
+            hist.forEach(h => {
+                const dt = new Date(h.date + 'T12:00:00');
+                const qLabel = `Q${Math.ceil((dt.getMonth()+1)/3)} ${dt.getFullYear()}`;
+                const est = h.eps_estimate != null ? '$' + h.eps_estimate.toFixed(2) : '—';
+                const act = h.eps_actual != null ? '$' + h.eps_actual.toFixed(2) : '—';
+                const surp = h.surprise_pct != null ? (h.surprise_pct > 0 ? '+' : '') + h.surprise_pct.toFixed(1) + '%' : '—';
+                let result = '—';
+                let resultCls = 'inline';
+                if (h.eps_actual != null && h.eps_estimate != null) {
+                    if (h.eps_actual > h.eps_estimate) { result = 'BEAT'; resultCls = 'beat'; }
+                    else if (h.eps_actual < h.eps_estimate) { result = 'MISS'; resultCls = 'miss'; }
+                    else { result = 'IN-LINE'; resultCls = 'inline'; }
+                }
+                rows += `<tr>
+                    <td>${qLabel}</td>
+                    <td>${est}</td>
+                    <td>${act}</td>
+                    <td class="${resultCls}">${surp}</td>
+                    <td class="${resultCls}">${result}</td>
+                </tr>`;
+            });
+            tbody.innerHTML = rows;
+        }
+
+        // Transcript links
+        const tList = transcripts[ticker] || [];
+        const linksDiv = document.getElementById('transcript-links');
+        const summaryDiv = document.getElementById('summary-content');
+
+        if (!tList.length) {
+            linksDiv.innerHTML = '';
+            summaryDiv.innerHTML = '<p class="no-data">No transcripts available for this company</p>';
+        } else {
+            let linksHtml = '';
+            tList.forEach((t, i) => {
+                const label = t.label || `Q${t.quarter} ${t.year}`;
+                linksHtml += `<a href="#" class="q-link${i===0?' active-q':''}" data-idx="${i}" data-ticker="${ticker}">${label}</a>`;
+                linksHtml += `<a href="${t.html_file}" target="_blank" style="font-size:11px;color:var(--text-secondary);padding:6px 10px;text-decoration:none;" title="Open full transcript">Full</a>`;
+            });
+            linksDiv.innerHTML = linksHtml;
+
+            // Show first transcript summary
+            showTranscriptSummary(ticker, 0);
+
+            // Click handlers
+            linksDiv.querySelectorAll('.q-link').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    linksDiv.querySelectorAll('.q-link').forEach(l => l.classList.remove('active-q'));
+                    this.classList.add('active-q');
+                    showTranscriptSummary(this.dataset.ticker, parseInt(this.dataset.idx));
+                });
+            });
+        }
+    }
+
+    function showTranscriptSummary(ticker, idx) {
+        const tList = transcripts[ticker] || [];
+        const summaryDiv = document.getElementById('summary-content');
+        if (!tList[idx]) { summaryDiv.innerHTML = '<p class="no-data">No summary available</p>'; return; }
+
+        const t = tList[idx];
+        const raw = t.summary || '';
+        if (!raw) { summaryDiv.innerHTML = '<p class="no-data">No AI summary available for this transcript</p>'; return; }
+
+        // Parse the 5-section summary into HTML
+        let html = formatSummary(raw);
+        summaryDiv.innerHTML = html;
+    }
+
+    function formatSummary(text) {
+        // Convert **SECTION** headers to h3, bullet points to list items
+        let html = '';
+        const lines = text.split('\n');
+        let inList = false;
+
+        lines.forEach(line => {
+            const trimmed = line.trim();
+            if (!trimmed) {
+                if (inList) { html += '</ul>'; inList = false; }
+                return;
+            }
+            // Section headers like **KEY HIGHLIGHTS**
+            const headerMatch = trimmed.match(/^\*\*(.+?)\*\*$/);
+            if (headerMatch) {
+                if (inList) { html += '</ul>'; inList = false; }
+                html += `<h3>${headerMatch[1]}</h3>`;
+                return;
+            }
+            // Bullet points
+            if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
+                if (!inList) { html += '<ul>'; inList = true; }
+                html += `<li>${trimmed.substring(2)}</li>`;
+                return;
+            }
+            // Regular paragraph
+            if (inList) { html += '</ul>'; inList = false; }
+            html += `<p>${trimmed}</p>`;
+        });
+        if (inList) html += '</ul>';
+        return html;
+    }
+
+    // ── Quarterly Comparison ──
+    function buildQuarterSelector() {
+        // Gather all available quarters from transcript summaries
+        const quarters = new Set();
+        Object.values(transcripts).forEach(tList => {
+            if (Array.isArray(tList)) {
+                tList.forEach(t => {
+                    if (t.quarter && t.year) quarters.add(`Q${t.quarter} ${t.year}`);
+                });
+            }
+        });
+
+        const sorted = Array.from(quarters).sort((a, b) => {
+            const [qa, ya] = [a.slice(1,2), a.slice(3)];
+            const [qb, yb] = [b.slice(1,2), b.slice(3)];
+            return yb - ya || qb - qa;
+        });
+
+        const container = document.getElementById('quarter-selector');
+        sorted.forEach((q, i) => {
+            const btn = document.createElement('button');
+            btn.textContent = q;
+            btn.dataset.quarter = q;
+            btn.addEventListener('click', function() {
+                container.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                showQuarterComparison(this.dataset.quarter);
+            });
+            container.appendChild(btn);
+        });
+    }
+
+    function showQuarterComparison(quarterLabel) {
+        document.getElementById('compare-placeholder').style.display = 'none';
+        const grid = document.getElementById('compare-grid');
+        const [qStr, yearStr] = quarterLabel.split(' ');
+        const qNum = parseInt(qStr.slice(1));
+        const year = parseInt(yearStr);
+
+        // Gather data for each company for this quarter
+        const cards = [];
+        Object.entries(transcripts).forEach(([ticker, tList]) => {
+            if (!Array.isArray(tList)) return;
+            const match = tList.find(t => t.quarter == qNum && t.year == year);
+            if (!match) return;
+
+            const d = md[ticker] || {};
+            const hist = d.earnings_history || [];
+            // Find the earnings result for this quarter
+            let result = null;
+            hist.forEach(h => {
+                const dt = new Date(h.date + 'T12:00:00');
+                if (dt.getFullYear() === year && Math.ceil((dt.getMonth()+1)/3) === qNum) {
+                    result = h;
+                }
+            });
+
+            // Get guidance from analysis bundle
+            let guidance = null;
+            const compAnalysis = (analysis.companies || {})[ticker];
+            if (compAnalysis && compAnalysis.guidance_history) {
+                const gKey = `${year}-Q${qNum}`;
+                guidance = compAnalysis.guidance_history[gKey];
+            }
+            // Also check latest_sentiment
+            if (!guidance && analysis.latest_sentiment && analysis.latest_sentiment[ticker]) {
+                const ls = analysis.latest_sentiment[ticker];
+                if (ls.period === `${year}-Q${qNum}`) guidance = ls.direction;
+            }
+
+            // Extract key highlights from summary
+            let highlights = '';
+            if (match.summary) {
+                const hlMatch = match.summary.match(/\*\*KEY HIGHLIGHTS\*\*\n([\s\S]*?)(?=\n\*\*|$)/);
+                if (hlMatch) {
+                    const bullets = hlMatch[1].split('\n').filter(l => l.trim().startsWith('- ')).slice(0, 3);
+                    highlights = bullets.map(b => b.trim().substring(2)).join('<br>');
+                }
+            }
+
+            cards.push({
+                ticker,
+                company: d.name || d.company || ticker,
+                category: d.category || '',
+                result,
+                guidance,
+                highlights,
+                html_file: match.html_file,
+            });
+        });
+
+        // Sort: beats first, then misses, then no data
+        cards.sort((a, b) => {
+            const aScore = a.result ? (a.result.eps_actual > a.result.eps_estimate ? 2 : a.result.eps_actual < a.result.eps_estimate ? 0 : 1) : -1;
+            const bScore = b.result ? (b.result.eps_actual > b.result.eps_estimate ? 2 : b.result.eps_actual < b.result.eps_estimate ? 0 : 1) : -1;
+            return bScore - aScore;
+        });
+
+        if (!cards.length) {
+            grid.innerHTML = '<div class="no-data">No transcript data available for this quarter</div>';
+            return;
+        }
+
+        let html = '';
+        cards.forEach(c => {
+            const color = catColors[c.category] || '#ffd700';
+            let resultHtml = '';
+            if (c.result) {
+                const isBeat = c.result.eps_actual > c.result.eps_estimate;
+                const isMiss = c.result.eps_actual < c.result.eps_estimate;
+                const cls = isBeat ? 'beat' : isMiss ? 'miss' : 'inline';
+                const label = isBeat ? 'BEAT' : isMiss ? 'MISS' : 'IN-LINE';
+                const surp = c.result.surprise_pct != null ? ` (${c.result.surprise_pct > 0 ? '+' : ''}${c.result.surprise_pct.toFixed(1)}%)` : '';
+                resultHtml = `<span class="cc-result ${cls}">${label}${surp}</span>`;
+            }
+
+            let guidanceHtml = '';
+            if (c.guidance) {
+                const gLower = c.guidance.toLowerCase();
+                const gCls = gLower === 'raised' ? 'guidance-raised' : gLower === 'lowered' ? 'guidance-lowered' : 'guidance-maintained';
+                guidanceHtml = `<span class="cc-guidance ${gCls}">Guidance: ${c.guidance}</span>`;
+            }
+
+            html += `<div class="compare-card" style="border-left-color:${color}">
+                <div class="cc-header">
+                    <div>
+                        <span class="cc-ticker"><a class="yf-link" href="TIC_NDT_Company_Summary.html#company=${c.ticker}">${c.ticker}</a></span>
+                        <span class="cc-company" style="margin-left:8px;">${c.company}</span>
+                    </div>
+                    ${resultHtml}
+                </div>
+                ${c.result ? `<div style="font-size:12px;color:var(--text-secondary);margin-bottom:8px;">EPS: $${c.result.eps_actual.toFixed(2)} vs est. $${(c.result.eps_estimate||0).toFixed(2)}</div>` : ''}
+                ${c.highlights ? `<div class="cc-highlights">${c.highlights}</div>` : ''}
+                ${guidanceHtml}
+                ${c.html_file ? `<div style="margin-top:8px;"><a href="${c.html_file}" target="_blank" style="font-size:11px;color:var(--accent);text-decoration:none;">Read Full Transcript →</a></div>` : ''}
+            </div>`;
+        });
+        grid.innerHTML = html;
+    }
+
+    // ── Last Updated ──
+    function showLastUpdated() {
+        const el = document.getElementById('last-updated');
+        if (D.generated_at) {
+            const dt = new Date(D.generated_at);
+            el.textContent = 'Updated: ' + dt.toLocaleDateString('en-US', {month:'short',day:'numeric',year:'numeric'}) + ' ' + dt.toLocaleTimeString('en-US', {hour:'numeric',minute:'2-digit'});
+        }
+    }
+
+    // ── Auth handled by auth.js (included in head) ──
+
+    // ── Init ──
+    buildTickerBar();
+    buildCalendar();
+    buildCompanySelect();
+    buildQuarterSelector();
+    showLastUpdated();
+})();
+</script>
+
+  <script src="csv_export.js?v=3" defer></script>
+
+
+<script>
+/* __ticker_live_v2 — appended by fix_tickers.py (idempotent) */
+(function(){
+    var el = document.getElementById('ticker-track')
+          || document.getElementById('ticker-inner')
+          || document.getElementById('tickerTrack');
+    if (!el) return;
+    var useT = (el.id === 'ticker-inner');
+    function fullRender(quotes){
+        var html = '';
+        quotes.forEach(function(q){
+            var chg = q.changePct || 0;
+            var arrow = chg > 0 ? '\u25B2' : chg < 0 ? '\u25BC' : '';
+            if (useT) {
+                var dir = chg > 0 ? 'up' : chg < 0 ? 'dn' : '';
+                html += '<div class="ticker-item"><span class="t-sym">' + q.ticker + '</span><span class="t-price">$' + (q.price||0).toFixed(2) + '</span><span class="t-chg ' + dir + '">' + arrow + (chg >= 0 ? '+' : '') + chg.toFixed(1) + '%</span></div>';
+            } else {
+                var dir = chg > 0 ? 'tk-up' : chg < 0 ? 'tk-down' : 'tk-flat';
+                html += '<div class="ticker-item"><span class="tk-sym">' + q.ticker + '</span><span class="tk-price">$' + (q.price||0).toFixed(2) + '</span><span class="' + dir + '">' + arrow + (chg >= 0 ? '+' : '') + chg.toFixed(1) + '%</span></div>';
+            }
+        });
+        el.innerHTML = html + html;
+    }
+    function hasEmptySymbols(){
+        var items = el.querySelectorAll('.ticker-item');
+        if (items.length === 0) return false;
+        var firstSym = items[0].querySelector('.tk-sym, .t-sym');
+        return !firstSym || !(firstSym.textContent || '').trim();
+    }
+    function overlayUpdate(quotes){
+        var qm = {};
+        quotes.forEach(function(q){ qm[q.ticker] = q; });
+        var items = el.querySelectorAll('.ticker-item');
+        items.forEach(function(item){
+            var sym = item.querySelector('.tk-sym, .t-sym');
+            if (!sym) return;
+            var tk = (sym.textContent || '').trim();
+            var q = qm[tk];
+            if (!q) return;
+            var priceEl = item.querySelector('.tk-price, .t-price');
+            if (priceEl) priceEl.textContent = '$' + (q.price||0).toFixed(2);
+            var chg = q.changePct || 0;
+            var arrow = chg > 0 ? '\u25B2' : chg < 0 ? '\u25BC' : '';
+            var spans = item.querySelectorAll('span');
+            var chgEl = spans[spans.length - 1];
+            if (chgEl) chgEl.textContent = arrow + (chg >= 0 ? '+' : '') + chg.toFixed(1) + '%';
+        });
+    }
+    function refresh(){
+        var c = new AbortController();
+        var t = setTimeout(function(){ c.abort(); }, 8000);
+        fetch('/api/quotes', { signal: c.signal })
+            .then(function(r){ if (!r.ok) throw 0; return r.json(); })
+            .then(function(d){
+                if (!d || !d.quotes || !d.quotes.length) return;
+                var items = el.querySelectorAll('.ticker-item');
+                if (items.length === 0 || hasEmptySymbols()) fullRender(d.quotes);
+                else overlayUpdate(d.quotes);
+            })
+            .catch(function(){})
+            .finally(function(){ clearTimeout(t); });
+    }
+    setTimeout(refresh, 1000);
+    var __ti = setInterval(refresh, 60000);
+    window.addEventListener('pagehide', function(){ clearInterval(__ti); });
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,10 @@
+# Cloudflare Pages configuration for Inspection Intel
+# KV namespace bindings for Pages Functions
+
+name = "inspection-intel"
+pages_build_output_dir = "."
+
+[[kv_namespaces]]
+binding = "SUBSCRIBERS"
+id = "f1abd6b653b84bb8a34363c63fd31e38"
+

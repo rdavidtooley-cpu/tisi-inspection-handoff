@@ -1,0 +1,211 @@
+{
+  "user_agent": "InspectionIntel RobertTooley __ADMIN_EMAIL__",
+  "companies": [
+    {
+      "name": "Mistras Group",
+      "ticker": "MG",
+      "cik": "0001436126",
+      "category": "NDT_Services",
+      "folder": "MistrasGroup_MG",
+      "form_types": ["10-K", "10-Q", "8-K"],
+      "active": true
+    },
+    {
+      "name": "Team Inc",
+      "ticker": "TISI",
+      "cik": "0000318833",
+      "category": "NDT_Services",
+      "folder": "TeamInc_TISI",
+      "form_types": ["10-K", "10-Q", "8-K"],
+      "active": true
+    },
+    {
+      "name": "Acuren Group",
+      "ticker": "TIC",
+      "cik": "0002032966",
+      "category": "NDT_Services",
+      "folder": "Acuren_TIC",
+      "form_types": ["10-K", "10-Q", "8-K"],
+      "active": true
+    },
+    {
+      "name": "Oceaneering International",
+      "ticker": "OII",
+      "cik": "0000073756",
+      "category": "NDT_Services",
+      "folder": "Oceaneering_OII",
+      "form_types": ["10-K", "10-Q", "8-K"],
+      "active": true
+    },
+    {
+      "name": "Expro Group",
+      "ticker": "XPRO",
+      "cik": "0001575828",
+      "category": "NDT_Services",
+      "folder": "ExproGroup_XPRO",
+      "form_types": ["10-K", "10-Q", "8-K", "20-F", "6-K"],
+      "active": true
+    },
+    {
+      "name": "Transcat",
+      "ticker": "TRNS",
+      "cik": "0000099302",
+      "category": "NDT_Adjacent",
+      "folder": "Transcat_TRNS",
+      "form_types": ["10-K", "10-Q", "8-K"],
+      "active": true
+    },
+    {
+      "name": "Thermon Group",
+      "ticker": "THR",
+      "cik": "0001489096",
+      "category": "NDT_Adjacent",
+      "folder": "Thermon_THR",
+      "form_types": ["10-K", "10-Q", "8-K"],
+      "active": true
+    },
+    {
+      "name": "SGS SA",
+      "ticker": "SGSN.SW",
+      "cik": null,
+      "category": "Global_NDT",
+      "folder": "SGS_SGSN",
+      "form_types": [],
+      "active": false,
+      "note": "SIX Swiss Exchange listed. No SEC filings. Use ir_fetcher.py for annual/interim reports."
+    },
+    {
+      "name": "Bureau Veritas",
+      "ticker": "BVI.PA",
+      "cik": null,
+      "category": "Global_NDT",
+      "folder": "BureauVeritas_BVI",
+      "form_types": [],
+      "active": false,
+      "note": "Euronext Paris listed. No SEC filings. Use ir_fetcher.py for registration documents."
+    },
+    {
+      "name": "Intertek Group",
+      "ticker": "ITRK.L",
+      "cik": null,
+      "category": "Global_NDT",
+      "folder": "Intertek_ITRK",
+      "form_types": [],
+      "active": false,
+      "note": "LSE listed. No SEC filings. Use ir_fetcher.py for annual/interim reports."
+    },
+    {
+      "name": "Comet Group",
+      "ticker": "COTN.SW",
+      "cik": null,
+      "category": "Global_NDT",
+      "folder": "CometGroup_COTN",
+      "form_types": [],
+      "active": false,
+      "note": "SIX Swiss Exchange listed. No SEC filings. Use ir_fetcher.py for annual/interim reports."
+    },
+    {
+      "name": "Flowserve",
+      "ticker": "FLS",
+      "cik": "0000030625",
+      "category": "Flow_Control",
+      "folder": "Flowserve_FLS",
+      "form_types": ["10-K", "10-Q", "8-K"],
+      "active": true
+    },
+    {
+      "name": "Rotork",
+      "ticker": "ROR.L",
+      "cik": null,
+      "category": "Flow_Control",
+      "folder": "Rotork_ROR",
+      "form_types": [],
+      "active": false,
+      "note": "LSE listed. No SEC filings. Use ir_fetcher.py for annual/interim reports."
+    },
+    {
+      "name": "IMI plc",
+      "ticker": "IMI.L",
+      "cik": null,
+      "category": "Flow_Control",
+      "folder": "IMI_IMI",
+      "form_types": [],
+      "active": false,
+      "note": "LSE listed. No SEC filings. Use ir_fetcher.py for annual/interim reports."
+    },
+    {
+      "name": "Spirax Group",
+      "ticker": "SPX.L",
+      "cik": null,
+      "category": "Flow_Control",
+      "folder": "Spirax_SPX",
+      "form_types": [],
+      "active": false,
+      "note": "LSE listed. No SEC filings. Use ir_fetcher.py for annual/interim reports."
+    },
+    {
+      "name": "Weir Group",
+      "ticker": "WEIR.L",
+      "cik": null,
+      "category": "Flow_Control",
+      "folder": "Weir_WEIR",
+      "form_types": [],
+      "active": false,
+      "note": "LSE listed. No SEC filings. Use ir_fetcher.py for annual/interim reports."
+    },
+    {
+      "name": "Cactus Inc",
+      "ticker": "WHD",
+      "cik": "0001699136",
+      "category": "Flow_Control",
+      "folder": "Cactus_WHD",
+      "form_types": ["10-K", "10-Q", "8-K"],
+      "active": true
+    },
+    {
+      "name": "Matrix Service",
+      "ticker": "MTRX",
+      "cik": "0000866273",
+      "category": "Mech_OnSite_Services",
+      "folder": "MatrixService_MTRX",
+      "form_types": ["10-K", "10-Q", "8-K"],
+      "active": true
+    },
+    {
+      "name": "Primoris Services",
+      "ticker": "PRIM",
+      "cik": "0001361538",
+      "category": "Mech_OnSite_Services",
+      "folder": "Primoris_PRIM",
+      "form_types": ["10-K", "10-Q", "8-K"],
+      "active": true
+    },
+    {
+      "name": "MasTec",
+      "ticker": "MTZ",
+      "cik": "0000015615",
+      "category": "Mech_OnSite_Services",
+      "folder": "MasTec_MTZ",
+      "form_types": ["10-K", "10-Q", "8-K"],
+      "active": true
+    },
+    {
+      "name": "Clean Harbors",
+      "ticker": "CLH",
+      "cik": "0000822818",
+      "category": "Mech_OnSite_Services",
+      "folder": "CleanHarbors_CLH",
+      "form_types": ["10-K", "10-Q", "8-K"],
+      "active": true
+    },
+    {
+      "name": "Forum Energy Technologies",
+      "ticker": "FET",
+      "cik": "0001401257",
+      "category": "Mech_OnSite_Services",
+      "folder": "ForumEnergy_FET",
+      "form_types": ["10-K", "10-Q", "8-K"],
+      "active": true
+    }
+  ]
+}
