@@ -107,3 +107,12 @@ Every chart over a time series must include the standard range bar:
 - Live site (not local) shows the change
 - JSON data files contain valid JSON (no conflict markers)
 - If a LaunchAgent was edited, it was reloaded (`launchctl unload + load`)
+
+## At session start, work the open items first
+
+Run `gh issue list --label claude-todo` and check review comments on open PRs;
+work those first and close issues when fixed. In cloud sessions `gh issue list`
+is blocked, so use the REST route instead:
+`gh api "repos/rdavidtooley-cpu/tisi-inspection-handoff/issues?labels=claude-todo&state=open"`
+and `gh api repos/rdavidtooley-cpu/tisi-inspection-handoff/pulls?state=open`
+(or the GitHub MCP tools).
